@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>755 Old Jonas Hill Road - Marketing Performance Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #4d7c59 0%, #5b5d5a 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 300;
+            color: #4d7c59;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #5b5d5a;
+            font-weight: 300;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.95);
+            color: #4d7c59;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        @supports (display: grid) {
+            .metrics-grid {
+                display: grid;
+            }
+        }
+
+        @supports not (display: grid) {
+            .metrics-grid {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .metric-card {
+                flex: 1 1 280px;
+                max-width: 300px;
+                margin: 10px;
+            }
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #4d7c59, #5b5d5a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: #5b5d5a;
+            font-weight: 500;
+        }
+
+        .metric-subtitle {
+            font-size: 0.9rem;
+            color: #5b5d5a;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
+        .chart-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #4d7c59;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 20px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+        }
+
+        @supports (display: grid) {
+            .chart-grid {
+                display: grid;
+            }
+        }
+
+        @supports not (display: grid) {
+            .chart-grid {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .chart-section {
+                flex: 1 1 500px;
+                max-width: 600px;
+                margin: 15px;
+            }
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #4d7c59, #5b5d5a);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlight-box h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .highlight-box p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #4d7c59, #5b5d5a);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            margin-top: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .footer p {
+            color: #5b5d5a;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        /* Tablet styles */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+                line-height: 1.2;
+            }
+            
+            .header p {
+                font-size: 1rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+            
+            .tab {
+                width: 250px;
+                text-align: center;
+                padding: 12px 20px;
+                font-size: 0.9rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            
+            .metric-card {
+                padding: 20px;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+            
+            .metric-label {
+                font-size: 0.9rem;
+            }
+            
+            .chart-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .chart-section {
+                padding: 20px;
+            }
+            
+            .chart-section h2 {
+                font-size: 1.4rem;
+                margin-bottom: 20px;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .highlight-box {
+                padding: 20px;
+                margin: 15px 0;
+            }
+            
+            .highlight-box h3 {
+                font-size: 1.2rem;
+            }
+            
+            .highlight-box p {
+                font-size: 0.9rem;
+            }
+            
+            .data-table {
+                font-size: 0.8rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 10px 8px;
+            }
+            
+            .footer {
+                padding: 20px;
+                margin-top: 20px;
+            }
+        }
+
+        /* Small mobile styles */
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 8px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.6rem;
+            }
+            
+            .header p {
+                font-size: 0.9rem;
+            }
+            
+            .tab {
+                width: 200px;
+                padding: 10px 15px;
+                font-size: 0.8rem;
+            }
+            
+            .metric-card {
+                padding: 15px;
+            }
+            
+            .metric-value {
+                font-size: 1.8rem;
+            }
+            
+            .metric-icon {
+                font-size: 2rem;
+            }
+            
+            .chart-section {
+                padding: 15px;
+            }
+            
+            .chart-section h2 {
+                font-size: 1.2rem;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .highlight-box {
+                padding: 15px;
+            }
+            
+            .highlight-box h3 {
+                font-size: 1.1rem;
+            }
+            
+            .highlight-box p {
+                font-size: 0.85rem;
+            }
+            
+            .data-table {
+                font-size: 0.7rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 5px;
+            }
+        }
+
+        /* Large desktop styles */
+        @media (min-width: 1400px) {
+            .dashboard-container {
+                max-width: 1400px;
+                padding: 30px;
+            }
+            
+            .header h1 {
+                font-size: 3.5rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 25px;
+            }
+            
+            .chart-container {
+                height: 450px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>755 Old Jonas Hill Road</h1>
+            <p>Marketing Performance Dashboard • Property Listed 2/27</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('overview')">📊 Overview</button>
+            <button class="tab" onclick="showTab('email')">📧 Email Marketing</button>
+            <button class="tab" onclick="showTab('digital')">🎯 Digital Advertising</button>
+            <button class="tab" onclick="showTab('social')">📱 Social Media</button>
+        </div>
+
+        <div id="overview" class="tab-content active">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">📧</div>
+                    <div class="metric-value">64,333</div>
+                    <div class="metric-label">Total Email Opens</div>
+                    <div class="metric-subtitle">Across all campaigns</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">👆</div>
+                    <div class="metric-value">4,278</div>
+                    <div class="metric-label">Total Email Clicks</div>
+                    <div class="metric-subtitle">6.6% average CTR</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">👀</div>
+                    <div class="metric-value">232,400</div>
+                    <div class="metric-label">Total Ad Views</div>
+                    <div class="metric-subtitle">Lead Gen Labs</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-icon">❤️</div>
+                    <div class="metric-value">556</div>
+                    <div class="metric-label">Social Interactions</div>
+                    <div class="metric-subtitle">5.1% engagement rate</div>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-section">
+                    <h2>Third-Party Platform Performance</h2>
+                    <div class="chart-container">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h2>Marketing Channel Distribution</h2>
+                    <div class="chart-container">
+                        <canvas id="channelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="email" class="tab-content">
+            <div class="highlight-box">
+                <h3>🎯 Top Performing Email Campaigns</h3>
+                <p><strong>For Lease eBlast (7/7):</strong> 5,169 opens, 117 clicks (2.3% CTR)</p>
+                <p><strong>Just Listed eBlast (5/5):</strong> 3,180 opens, 542 clicks (17.0% CTR)</p>
+                <p><strong>Just Listed eBlast (2/27):</strong> 2,993 opens, 570 clicks (19.0% CTR)</p>
+            </div>
+
+            <div class="chart-section">
+                <h2>Email Performance Over Time</h2>
+                <div class="chart-container">
+                    <canvas id="emailChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-section">
+                <h2>Campaign Performance Summary</h2>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Campaign Type</th>
+                            <th>Total Opens</th>
+                            <th>Total Clicks</th>
+                            <th>Average CTR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Just Listed eBlasts</td>
+                            <td>11,342</td>
+                            <td>1,229</td>
+                            <td>10.8%</td>
+                        </tr>
+                        <tr>
+                            <td>DGT Listing Newsletters</td>
+                            <td>44,422</td>
+                            <td>2,932</td>
+                            <td>6.6%</td>
+                        </tr>
+                        <tr>
+                            <td>DGT Buyer Emails</td>
+                            <td>340</td>
+                            <td>7</td>
+                            <td>2.1%</td>
+                        </tr>
+                        <tr>
+                            <td>Special eBlasts</td>
+                            <td>8,229</td>
+                            <td>147</td>
+                            <td>1.8%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="digital" class="tab-content">
+            <div class="highlight-box">
+                <h3>📈 Digital Advertising Growth</h3>
+                <p><strong>Total Views:</strong> 232,400 (March - June)</p>
+                <p><strong>Click-Through Rate:</strong> Improved from 0.29% to 0.51%</p>
+                <p><strong>Peak Performance:</strong> June 20th with 232,400 views</p>
+            </div>
+
+            <div class="chart-section">
+                <h2>Digital Advertising Growth Trend</h2>
+                <div class="chart-container">
+                    <canvas id="digitalChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="social" class="tab-content">
+            <div class="highlight-box">
+                <h3>📱 Social Media Highlights</h3>
+                <p><strong>Total Views:</strong> 10,844 across all platforms</p>
+                <p><strong>Total Interactions:</strong> 556 (5.1% engagement rate)</p>
+                <p><strong>Best Post:</strong> 2/26 post with 2,193 views and 193 interactions</p>
+            </div>
+
+            <div class="chart-grid">
+                <div class="chart-section">
+                    <h2>Social Media Performance</h2>
+                    <div class="chart-container">
+                        <canvas id="socialChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <h2>Content Type Performance</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Content Type</th>
+                                <th>Total Views</th>
+                                <th>Interactions</th>
+                                <th>Engagement Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Posts</td>
+                                <td>9,462</td>
+                                <td>527</td>
+                                <td>5.6%</td>
+                            </tr>
+                            <tr>
+                                <td>Stories</td>
+                                <td>1,382</td>
+                                <td>29</td>
+                                <td>2.1%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>Marketing Report for 755 Old Jonas Hill Road</strong></p>
+            <p>Comprehensive analysis across all marketing channels</p>
+            <p>Report generated: <span id="currentDate"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Set current date
+        document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+
+        // Tab functionality
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Chart configurations with responsive options
+        const chartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        },
+                        maxRotation: window.innerWidth < 768 ? 45 : 0
+                    }
+                }
+            }
+        };
+
+        // Responsive chart resize function
+        function resizeCharts() {
+            Chart.helpers.each(Chart.instances, function(instance) {
+                instance.resize();
+            });
+        }
+
+        // Listen for window resize
+        window.addEventListener('resize', function() {
+            setTimeout(resizeCharts, 100);
+        });
+
+        // Platform Performance Chart
+        const platformCtx = document.getElementById('platformChart').getContext('2d');
+        new Chart(platformCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Zillow', 'Realtor.com', 'Paragon', 'Trulia', 'Compass'],
+                datasets: [{
+                    label: 'Views (Last 30 Days)',
+                    data: [560, 184, 120, 44, 15],
+                    backgroundColor: [
+                        '#4d7c59', '#5b5d5a', '#4d7c59', '#5b5d5a', '#4d7c59'
+                    ],
+                    borderRadius: 10
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Channel Distribution Chart
+        const channelCtx = document.getElementById('channelChart').getContext('2d');
+        new Chart(channelCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Digital Advertising', 'Email Marketing', 'Social Media', 'Third-Party Platforms'],
+                datasets: [{
+                    data: [232400, 64333, 10844, 929],
+                    backgroundColor: ['#4d7c59', '#5b5d5a', '#4d7c59', '#5b5d5a'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+
+        // Email Performance Chart
+        const emailCtx = document.getElementById('emailChart').getContext('2d');
+        new Chart(emailCtx, {
+            type: 'line',
+            data: {
+                labels: ['Feb 27', 'Mar 7', 'Mar 14', 'Mar 21', 'Apr 4', 'Apr 11', 'May 2', 'May 9', 'Jun 6', 'Jul 3'],
+                datasets: [{
+                    label: 'Opens',
+                    data: [2993, 1855, 2049, 2169, 2084, 2208, 2241, 2242, 2126, 2040],
+                    borderColor: '#4d7c59',
+                    backgroundColor: 'rgba(77, 124, 89, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'Clicks',
+                    data: [570, 14, 10, 87, 329, 407, 402, 387, 5, 2],
+                    borderColor: '#5b5d5a',
+                    backgroundColor: 'rgba(91, 93, 90, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: chartOptions
+        });
+
+        // Digital Advertising Chart
+        const digitalCtx = document.getElementById('digitalChart').getContext('2d');
+        new Chart(digitalCtx, {
+            type: 'line',
+            data: {
+                labels: ['Mar 7', 'Mar 14', 'Mar 21', 'Apr 4', 'Apr 11', 'May 2', 'May 9', 'Jun 20'],
+                datasets: [{
+                    label: 'Views',
+                    data: [9658, 18425, 39371, 70548, 89643, 131000, 150500, 232400],
+                    borderColor: '#4d7c59',
+                    backgroundColor: 'rgba(77, 124, 89, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }, {
+                    label: 'CTR (%)',
+                    data: [0.29, 0.33, 0.29, 0.41, 0.44, 0.46, 0.48, 0.51],
+                    borderColor: '#5b5d5a',
+                    backgroundColor: 'rgba(91, 93, 90, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    yAxisID: 'y1'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        position: 'left',
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                    }
+                }
+            }
+        });
+
+        // Social Media Chart
+        const socialCtx = document.getElementById('socialChart').getContext('2d');
+        new Chart(socialCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Feb 26', 'Mar 7', 'Mar 11', 'Mar 14', 'May 6', 'Jun 27'],
+                datasets: [{
+                    label: 'Views',
+                    data: [2193, 682, 1056, 1154, 1188, 1845],
+                    backgroundColor: '#4d7c59',
+                    borderRadius: 10
+                }, {
+                    label: 'Interactions',
+                    data: [193, 23, 44, 47, 62, 56],
+                    backgroundColor: '#5b5d5a',
+                    borderRadius: 10
+                }]
+            },
+            options: chartOptions
+        });
+    </script>
+</body>
+</html>
